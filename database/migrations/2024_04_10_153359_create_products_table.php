@@ -13,15 +13,27 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('id_company');
-            $table->foreign('id_company')->references('id')->on('users')->onDelete('cascade');
+            $table->integer('code');
+            $table->integer('code2')->nullable();
+            $table->integer('code3')->nullable();
+            $table->string('code4')->nullable();
             $table->string('name');
-            $table->string('description');
+            $table->string('description')->nullable();
             $table->string('url1')->nullable();
             $table->string('url2')->nullable();
             $table->string('url3')->nullable();
-            $table->float('price');
-            $table->string('status');
+            $table->decimal('cost',20,2);
+            $table->decimal('utility',20,2);
+            $table->decimal('price',20,2);
+            $table->integer('stock_min')->nullable();
+            $table->integer('serial');
+            $table->integer('stock');
+            $table->string('type');
+            $table->string('code_fraction')->nullable();
+            $table->string('name_fraction')->nullable();
+            $table->decimal('equivalence_fraction',20,2)->nullable();
+            $table->decimal('price_fraction',20,2)->nullable();
+            $table->integer('status');
             $table->timestamps();
         });
     }

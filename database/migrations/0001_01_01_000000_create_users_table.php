@@ -19,9 +19,11 @@ return new class extends Migration
             $table->string('ci')->unique();
             $table->string('phone');
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('type');
+            $table->string('state')->nullable();
+            $table->string('city')->nullable();
+            $table->string('postal_zone')->nullable();
             $table->string('direction')->nullable();
             $table->string('logo')->nullable();
             $table->string('status');

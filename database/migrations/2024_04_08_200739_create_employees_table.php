@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('employees', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('id_company');
-            $table->foreign('id_company')->references('id')->on('users')->onDelete('cascade');
             $table->unsignedBigInteger('id_employee');
             $table->foreign('id_employee')->references('id')->on('users')->onDelete('cascade');
+            $table->decimal('percent');
+            $table->integer('smallBox');
             $table->timestamps();
         });
     }

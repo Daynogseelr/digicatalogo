@@ -7,58 +7,23 @@ use App\Models\Product;
 use App\Models\User;
 use App\Models\Cart;
 use App\Models\Employee;
+use App\Models\Dolar;
+use App\Models\Bill;
+use App\Models\Shopping; // Add this line
+use App\Models\Service; // Add this line
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth; // Agrega esta línea
 
 class DashboardController extends Controller{
-    public function index(){
-        if (auth()->user()->type == 'ADMINISTRADOR') {
-            $countCategory = Category::where('status', 1)->get()->count();
-            $countProduct = Product::get()->count();
-            $countClient = User::where('status', 1)->where('type', 'CLIENTE')->get()->count();
-            $countOrder = Cart::where('status','!=', 'ACTIVO')->where('status','!=', 'FINALIZADO')->where('status','!=', 'INCONCLUSO')->get()->count();
-            return view('dashboard', compact('countCategory','countProduct','countClient','countOrder'));
-        } else if (auth()->user()->type == 'EMPRESA') {
-            $countCategory = AddCategory::where('id_company', auth()->id())->groupBy('id_category')->count();
-            $countProduct = Product::where('id_company', auth()->id())->count();
-            $countClient = User::where('status', 1)->where('type', 'CLIENTE')->count();
-            $countOrder = Cart::where('status','!=', 'ACTIVO')->where('status','!=', 'FINALIZADO')->where('status','!=', 'INCONCLUSO')
-            ->where('id_company',auth()->id())->count();
-            return view('dashboard', compact('countCategory','countProduct','countClient','countOrder'));
-        } else if (auth()->user()->type == 'EMPLEADO'){
-            $id_company = Employee::select('id_company')->where('id_employee',auth()->id())->first();
-            $countCategory = AddCategory::where('id_company', $id_company->id_company)->groupBy('id_category')->count();
-            $countProduct = Product::where('id_company', $id_company->id_company)->count();
-            $countClient = User::where('status', 1)->where('type', 'CLIENTE')->count();
-            $countOrder = Cart::where('status','!=', 'ACTIVO')->where('status','!=', 'FINALIZADO')->where('status','!=', 'INCONCLUSO')
-            ->where('id_company',$id_company->id_company)->count();
-            return view('dashboard', compact('countCategory','countProduct','countClient','countOrder'));
-        } else {
-            return redirect()->route('storeIndex');
-        }
+     public function index(){
+        $countCategory = Category::where('status', 1)->get()->count();
+        $countProduct = Product::get()->count();
+        $countClient = User::where('status', 1)->where('type', 'CLIENTE')->get()->count();
+        $countBill = Bill::where('status','!=', 0)->get()->count();
+        $totalBilling = Bill::sum('net_amount'); // Calculate total billing
+        $totalPurchases = Shopping::sum('total'); // Calculate total purchases
+        $totalServices = Service::sum('price'); // Calculate total services
+        return view('dashboard', compact('countCategory','countProduct','countClient','countBill', 'totalBilling', 'totalPurchases', 'totalServices'));
     }
-    public function ajaxProductDashboard(){
-        if (auth()->user()->type == 'ADMINISTRADOR') {
-            if(request()->ajax()) {
-                return datatables()->of(Product::select('*'))
-                ->addIndexColumn()
-                ->make(true);
-            }
-        } else if (auth()->user()->type == 'EMPRESA') {
-            if(request()->ajax()) {
-                return datatables()->of(Product::select('*')->where('id_company',auth()->id()))
-                ->addIndexColumn()
-                ->make(true);
-            }
-        } else if (auth()->user()->type == 'EMPLEADO'){
-            $id_company = Employee::select('id_company')->where('id_employee',auth()->id())->first();
-            if(request()->ajax()) {
-                return datatables()->of(Product::select('*')->where('id_company',$id_company->id_company))
-                ->addIndexColumn()
-                ->make(true);
-            }
-        } else {
-            return redirect()->route('storeIndex');
-        }
-        return view('index');
-    }
+     
 }
