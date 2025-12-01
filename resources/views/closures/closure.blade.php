@@ -23,6 +23,27 @@
                     </div>
                     <div class="card-body p-3">
                         <div class="card-body" >
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <label for="inventory_date">{{ __('Fecha') }}</label>
+                                    <input type="date" id="inventory_date" class="form-control" value="{{ date('Y-m-d') }}">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="inventory_select">{{ __('Inventario') }}</label>
+                                    <select id="inventory_select" class="form-select">
+                                        <option value="">{{ __('Seleccionar inventario') }}</option>
+                                        @if(isset($inventories))
+                                            @foreach($inventories as $inv)
+                                                <option value="{{ $inv->id }}">{{ $inv->name }}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                </div>
+                                <div class="col-md-3 d-flex align-items-end">
+                                    <button id="btnInventoryClosure" class="btn btn-primary">{{ __('Generar cierre inventario') }}</button>
+                                </div>
+                            </div>
+
                             {!! $dataTable->table(['class' => 'table table-striped', 'style' => 'font-size:13px;width:98%!important;'], true) !!}
                         </div>
                     </div>
@@ -92,5 +113,23 @@
                 }
             });
         }
+        // Generar cierre de inventario PDF
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('btnInventoryClosure').addEventListener('click', function() {
+                const date = document.getElementById('inventory_date').value;
+                const inventoryId = document.getElementById('inventory_select').value;
+                if (!date) {
+                    Swal.fire('Error', '{{ __('Selecciona una fecha') }}', 'error');
+                    return;
+                }
+                if (!inventoryId) {
+                    Swal.fire('Error', '{{ __('Selecciona un inventario') }}', 'error');
+                    return;
+                }
+                // Abrir en nueva pestaña la ruta que generará el PDF
+                const url = '{{ url("/pdfInventory") }}' + '?date=' + encodeURIComponent(date) + '&inventory_id=' + encodeURIComponent(inventoryId);
+                window.open(url, '_blank');
+            });
+        });
     </script>
 @endsection

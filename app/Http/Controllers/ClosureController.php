@@ -11,6 +11,7 @@ use App\Models\Bill_payment;
 use App\Models\Employee;
 use App\Models\SmallBox;
 use App\Models\User;
+use App\Models\Inventory;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Yajra\DataTables\Facades\DataTables;
@@ -21,7 +22,9 @@ class ClosureController extends Controller
     public function indexClosure(GlobalClosureDataTable $dataTable)
     {
         if (auth()->user()->type == 'ADMINISTRADOR' || auth()->user()->type == 'EMPRESA' || auth()->user()->type == 'EMPLEADO' ||  auth()->user()->type == 'SUPERVISOR' ||  auth()->user()->type == 'ADMINISTRATIVO') {
-            return $dataTable->render('closures.closure');
+            // Pasar inventarios activos a la vista para generar cierres de inventario
+            $inventories = Inventory::where('status', 1)->get();
+            return $dataTable->render('closures.closure', compact('inventories'));
         } else {
             return redirect()->route('indexStore');
         }

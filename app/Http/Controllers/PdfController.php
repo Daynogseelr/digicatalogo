@@ -338,6 +338,56 @@ class PdfController extends Controller
         ])->setPaper([0, 0, 226.77, 800])->stream('cierre.pdf');
     }
 
+    public function pdfInventoryClosure(Request $request)
+    {
+        $date = $request->query('date');
+        $inventoryId = $request->query('inventory_id');
+
+        if (!$date || !$inventoryId) {
+            abort(400, 'Parámetros inválidos');
+        }
+
+        // Nombre del inventario
+        $inventory = DB::table('inventories')->where('id', $inventoryId)->first();
+
+        // Consultar movimientos en stocks que estén asociados a facturas (id_bill != null)
+        $rows = DB::table('stocks')
+            ->join('bills', 'stocks.id_bill', '=', 'bills.id')
+            ->join('bill_details', function ($join) {
+                $join->on('bill_details.id_bill', '=', 'bills.id')
+                    ->on('bill_details.id_product', '=', 'stocks.id_product');
+            })
+            ->join('users as sellers', 'bills.id_seller', '=', 'sellers.id')
+            ->join('users as clients', 'bills.id_client', '=', 'clients.id')
+            ->where('stocks.id_inventory', $inventoryId)
+            ->whereNotNull('stocks.id_bill')
+            ->whereRaw('DATE(stocks.created_at) = ?', [$date])
+            ->select(
+                'bills.code as bill_code',
+                DB::raw("CONCAT(sellers.name, ' ', sellers.last_name) as seller"),
+                DB::raw("CONCAT(clients.name, ' ', clients.last_name) as client"),
+                'bill_details.code as product_code',
+                'bill_details.name as product_name',
+                'bill_details.quantity',
+                'bill_details.net_amount'
+            )
+            ->orderBy('bills.code')
+            ->get();
+
+        $generatedBy = auth()->user() ? auth()->user()->name . ' ' . auth()->user()->last_name : '';
+
+        $data = [
+            'inventory' => $inventory,
+            'date' => $date,
+            'rows' => $rows,
+            'generatedBy' => $generatedBy,
+            'generatedAt' => date('Y-m-d H:i:s'),
+        ];
+
+        $pdf = PDF::loadView('pdf.inventoryClosure', $data)->setPaper('a4', 'portrait');
+        return $pdf->stream('cierre_inventario_' . $inventoryId . '_' . $date . '.pdf');
+    }
+
     public function pdfClosureDetail($id)
     {
         // Traer el cierre

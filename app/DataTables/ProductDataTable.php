@@ -40,7 +40,7 @@ class ProductDataTable extends DataTable
                 for ($i = 1; $i <= 3; $i++) {
                     $url = $row->{'url'.$i};
                     if ($url) {
-                        $imgs[] = '<img src="'.asset('storage/'.$url).'" style="width:40px;height:40px;border-radius:6px;margin-right:4px;" />';
+                        $imgs[] = '<img src="' . asset('storage/' . $url) . '" onerror="this.onerror=null;this.src=\'' . asset('storage/products/product.png') . '\'" style="width:40px;height:40px;border-radius:6px;margin-right:4px;" />';
                     }
                 }
                 return implode('', $imgs);

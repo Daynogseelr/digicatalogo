@@ -18,8 +18,8 @@
             margin: 5px auto;
         }
     </style>
-    <div class="container-fluid py-1">
-        <div class="row mt-1">
+    <div class="container-fluid">
+        <div class="row ">
             <div class="col-lg-12 mb-lg-0 mb-4">
                 <div class="card z-index-2 h-100">
                     <div class="card-header pb-0 pt-3 bg-transparent">
@@ -835,14 +835,15 @@
                     for (var i = 1; i <= 3; i++) {
                         var imageUrl = res.product['url' + i];
                         if (imageUrl) {
-                            var fullImageUrl = '{{ asset('storage') }}' + '/' + imageUrl;
+                            // Añade un cache-buster para evitar cacheo del navegador y forzar recarga
+                            var fullImageUrl = '{{ asset('storage') }}' + '/' + imageUrl + '?t=' + Date.now();
                             $('#divimg' + i).html('<img class="imagendrop" src="' + fullImageUrl +
-                                '" onerror="this.src=\'{{ asset('storage/products/product.jpg') }}\'" alt="Product Image ' +
+                                '" onerror="this.onerror=null;this.src=\'{{ asset('storage/products/product.png') }}?t=' + Date.now() + '\'" alt="Product Image ' +
                                 i + '">');
                             $('#delete-img' + i).show();
                         } else {
                             $('#divimg' + i).html(
-                                '<img class="imagendrop" src="{{ asset('storage/products/product.jpg') }}">'
+                                '<img class="imagendrop" src="{{ asset('storage/products/product.png') }}?t=' + Date.now() + '">' 
                             );
                             $('#delete-img' + i).hide();
                         }
@@ -941,7 +942,7 @@
                             });
                             // Recarga la imagen y oculta el botón
                             $('#divimg' + index).html(
-                                '<img class="imagendrop" src="{{ asset('storage/products/product.jpg') }}">'
+                                '<img class="imagendrop" src="{{ asset('storage/products/product.png') }}">'
                             );
                             $('#delete-img' + index).hide();
                             $('#products-table').DataTable().ajax.reload();
@@ -1182,15 +1183,43 @@
                             reader.onload = function(event) {
                                 const base64Image = event.target.result.split(',')[
                                     1]; // Extract base64 data
-                                const url = ev.target.dataset.url;
+                                const rawUrl = ev.target.dataset.url;
+                                // Normalize data-url to expected backend field: url1, url2 or url3
+                                let url = null;
+                                if (rawUrl) {
+                                    // Match patterns like 'url1', 'url-1', '1', etc.
+                                    let m = rawUrl.match(/url[-_\s]*(\d+)/i) || rawUrl.match(/(\d+)/);
+                                    if (m && m[1]) {
+                                        url = 'url' + m[1];
+                                    } else if (rawUrl.toLowerCase() === 'url') {
+                                        url = 'url1';
+                                    } else {
+                                        url = rawUrl; // keep as provided as fallback
+                                    }
+                                }
                                 const id = $('#id').val();
                                 const formData = new FormData();
                                 formData.append('image', base64Image);
                                 formData.append('url', url);
                                 formData.append('id', id);
+                                // Ensure CSRF token is included and debug the payload
+                                formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
+                                // Validate url field expected by backend
+                                if (!url || !['url1','url2','url3'].includes(url)) {
+                                    console.warn('Invalid url field for upload-image:', url);
+                                    Swal.fire({
+                                        position: 'top-end',
+                                        icon: 'error',
+                                        title: 'Error: campo url inválido',
+                                        text: 'El campo url debe ser url1, url2 o url3',
+                                        showConfirmButton: true
+                                    });
+                                    return;
+                                }
+                                console.log('Uploading image to /upload-image', { id: id, url: url, base64Length: base64Image.length });
                                 // Send image data to Laravel controller via AJAX
                                 $.ajax({
-                                    url: "{{ url('/upload-image') }}", // Replace with your actual route
+                                    url: "{{ url('/upload-image') }}",
                                     method: 'POST',
                                     data: formData,
                                     processData: false,
@@ -1206,13 +1235,28 @@
                                         $('#products-table').DataTable().ajax.reload();
                                         editFunc(response);
                                     },
-                                    error: function(error) {
+                                    error: function(xhr) {
+                                        console.error('upload-image error', xhr.status, xhr.responseText, xhr.responseJSON);
+                                        // Build readable message from validation errors if present
+                                        var msg = 'Error al subir la imagen';
+                                        if (xhr.responseJSON) {
+                                            if (xhr.responseJSON.errors) {
+                                                // Join all validation messages
+                                                msg = Object.values(xhr.responseJSON.errors).flat().join('\n');
+                                            } else if (xhr.responseJSON.message) {
+                                                msg = xhr.responseJSON.message;
+                                            } else {
+                                                msg = JSON.stringify(xhr.responseJSON);
+                                            }
+                                        } else if (xhr.responseText) {
+                                            msg = xhr.responseText;
+                                        }
                                         Swal.fire({
                                             position: "top-end",
                                             icon: "error",
-                                            title: "((__('Something is wrong')))",
-                                            showConfirmButton: false,
-                                            timer: 1500
+                                            title: "Error",
+                                            text: msg,
+                                            showConfirmButton: true
                                         });
                                     }
                                 });

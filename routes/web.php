@@ -96,7 +96,7 @@ Route::middleware('auth')->group(function () {
     Route::post('deleteProduct', [ProductController::class, 'destroyProduct']);
     Route::get('statusProduct', [ProductController::class, 'statusProduct']);
     Route::post('/upload-image', [ProductController::class, 'uploadImage']);
-    Route::get('indexLabel', 'App\Http\Controllers\ProductController@indexLabel')->name('indexLabel');
+    Route::get('indexLabel', [ProductController::class, 'indexLabel'])->name('indexLabel');
     Route::get('ajax-crud-datatableLabel', [ProductController::class, 'ajaxLabel']);
     Route::post('storeLabel', [ProductController::class, 'storeLabel']);
     Route::post('storeLabelAll', [ProductController::class, 'storeLabelAll']);
@@ -229,6 +229,7 @@ Route::middleware('auth')->group(function () {
     Route::get('pdfClosureDetail/{id}', [PdfController::class, 'pdfClosureDetail'])->name('pdfClosureDetail');
     Route::get('pdfClosureDetailGlobal/{id}', [PdfController::class, 'pdfClosureDetailGlobal'])->name('pdfClosureDetailGlobal');
     Route::get('pdfProduct', [PdfController::class, 'pdfProduct'])->name('pdfProduct');
+    Route::get('pdfInventory', [PdfController::class, 'pdfInventoryClosure'])->name('pdfInventoryClosure');
     Route::get('pdfShopping/{id}', [PdfController::class, 'pdfShopping'])->name('pdfShopping');
     Route::get('pdfPayment/{id}', [PdfController::class, 'pdfPayment'])->name('pdfPayment');
     Route::get('pdfGuarantee/{id}', [PdfController::class, 'pdfGuarantee'])->name('pdfGuarantee');

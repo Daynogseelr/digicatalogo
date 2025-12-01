@@ -36,8 +36,8 @@
         color: #000000 !important;
     }
 </style>
-    <div class="container-fluid ">
-        <div class="row ">
+    <div class="container-fluid">
+        <div class="row">
             <div class="col-lg-12 mb-lg-0 mb-4">
                 <div class="card z-index-2 h-100">
                     <div class="card-header pb-0 pt-3 bg-transparent">

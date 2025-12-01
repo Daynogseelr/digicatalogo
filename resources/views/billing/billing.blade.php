@@ -2031,8 +2031,6 @@
                 }
             });
         }
-
-
         function verifySerial(callback) {
             $("#creditDays-modal").modal('hide');
             $.ajax({
@@ -2142,12 +2140,10 @@
                 }
             });
         }
-
         function modalDayCredit() {
             $("#creditDays").val('');
             $("#creditDays-modal").modal('show');
         }
-
         function storeBillWait() {
             var iva = $('#billIn').val();
             $.ajax({
@@ -2195,7 +2191,6 @@
             }
             billProduct();
         });
-
         document.addEventListener('keydown', function(event) {
             if (event.keyCode === 121 && !event.ctrlKey && !event.altKey && !event.shiftKey) {
                 // Prevenir el comportamiento por defecto de la tecla F10 (ej. abrir menú de depuración en algunos navegadores)
@@ -2203,7 +2198,6 @@
                 window.location.href = "{{ route('indexStore') }}";
             }
         });
-
         function hiddeProduct() {
             document.getElementById("hiddeProduct").style.display = "none";
             document.getElementById("hiddeBill").style.display = "block";
@@ -2213,7 +2207,6 @@
                 billProductTableInitialized = false;
             }
         }
-
         function hiddeBillWite() {
             document.getElementById("hiddeBillWait").style.display = "none";
             document.getElementById("hiddeBill").style.display = "block";
@@ -2223,7 +2216,6 @@
                 billWaitTableInitialized = false;
             }
         }
-
         function billWait() {
             document.getElementById("hiddeBillWait").style.display = "block";
             document.getElementById("hiddeBill").style.display = "none";
@@ -2315,14 +2307,12 @@
                 $('#ajax-crud-datatableBillWait').DataTable().ajax.reload();
             }
         }
-
         function centerTableContentWait() {
             $('#ajax-crud-datatableBillWait tbody tr td:nth-child(1)').addClass('text-center');
             $('#ajax-crud-datatableBillWait tbody tr td:nth-child(4)').addClass('text-center');
             $('#ajax-crud-datatableBillWait tbody tr td:nth-child(5)').addClass('text-end').css('padding-right', '50px');
             $('#ajax-crud-datatableBillWait tbody tr td:nth-child(6)').addClass('text-end').css('padding-right', '50px');
         }
-
         function billProduct() {
             document.getElementById("hiddeProduct").style.display = "block";
             document.getElementById("hiddeBill").style.display = "none";
@@ -2431,7 +2421,6 @@
                 $('#ajax-crud-datatableBill').DataTable().ajax.reload();
             }
         }
-
         function centerTableContent() {
             $('#ajax-crud-datatableBilling tbody tr td:nth-child(1)').addClass('text-center');
             $('#ajax-crud-datatableBilling tbody tr td:nth-child(3)').addClass('text-end').css('padding-right',
